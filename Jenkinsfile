@@ -40,24 +40,30 @@ pipeline {
 
         stage('Deploy to EC2') {
             steps {
-                echo "Starting Deployment to ${EC2_IP}..."
-                
-                sh """
-                    # 1. Ensure the app directory exists on EC2
+                echo "Deploying to ${EC2_IP}..."
+                // Use single quotes (''' ''') to avoid the Groovy Interpolation warning
+                sh '''
+                    # 1. Ensure directory exists
                     ssh -o StrictHostKeyChecking=no -i $MY_KEY $EC2_USER@$EC2_IP "mkdir -p ~/app"
                     
-                    # 2. Copy code files to the EC2 server
+                    # 2. Copy files
                     scp -o StrictHostKeyChecking=no -i $MY_KEY app.js package.json $EC2_USER@$EC2_IP:~/app/
                     
-                    # 3. Remote commands: install production dependencies and restart via PM2
+                    # 3. Remote commands
                     ssh -o StrictHostKeyChecking=no -i $MY_KEY $EC2_USER@$EC2_IP "
                         cd ~/app && \
                         npm install --production && \
-                        sudo npm install -g pm2 && \
-                        pm2 delete my-express-app || true && \
-                        pm2 start app.js --name my-express-app
+                        
+                        # Only install pm2 if it is missing to avoid 'directory not empty' errors
+                        if ! command -v pm2 &> /dev/null; then
+                            sudo npm install -g pm2
+                        fi
+                        
+                        # Restart the app
+                        /usr/local/bin/pm2 delete my-express-app || pm2 delete my-express-app || true
+                        /usr/local/bin/pm2 start app.js --name my-express-app || pm2 start app.js --name my-express-app
                     "
-                """
+                '''
             }
         }
     }
