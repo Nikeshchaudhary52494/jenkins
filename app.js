@@ -9,7 +9,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/status", (req, res) => {
-  res.status(200).json({ status: "UP", timestamp: new Date() });
+  res.status(200).json({ status: "UP", timestamp: new Date() );
 });
 
 const server = app.listen(port, () => {
