@@ -68,13 +68,28 @@ pipeline {
         }
     }
 
-    // Post-build actions give you feedback after the stages finish
     post {
         success {
-            echo "Successfully deployed to http://${EC2_IP}:3000 🎉"
+            mail to: 'nikeshchaudhary52494@gmail.com',
+                 subject: "✅ Success: Jenkins Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: """Congratulations Nikesh!
+                 
+The deployment to EC2 was successful.
+Project: ${env.JOB_NAME}
+Build Number: ${env.BUILD_NUMBER}
+App URL: http://65.0.21.169:3000
+
+Check the full logs here: ${env.BUILD_URL}"""
         }
+        
         failure {
-            echo "Build or Deployment failed. Check the logs above. ❌"
+            mail to: 'nikeshchaudhary52494@gmail.com',
+                 subject: "❌ Failed: Jenkins Build ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                 body: """Hello Nikesh,
+
+The build or deployment failed. The EC2 instance was NOT updated.
+Please check the console output to fix the errors:
+${env.BUILD_URL}console"""
         }
     }
-}
+} // This is the end of the pipeline
