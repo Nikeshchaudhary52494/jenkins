@@ -15,7 +15,7 @@ app.get("/", (req, res) => {
   `);
 });
 
-app.get("/status", (req, res) => {
+app.get("/statu", (req, res) => {
   res.status(200).json({ 
     status: "UP", 
     environment: process.env.NODE_ENV || 'production',
